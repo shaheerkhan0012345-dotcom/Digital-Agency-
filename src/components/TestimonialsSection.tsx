@@ -19,11 +19,11 @@ interface Testimonial {
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    id: 'stephen-brekke',
-    quote: "If you want real marketing that works and effective implementation – mobile app's got you covered.",
-    author: 'Stephen Brekke',
-    role: 'Legacy Integration Producer',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
+    id: 'elena-rostova',
+    quote: 'From UX wireframes to production deployment, HK Digital Agency brought our creative vision to life with precision and unmatched aesthetic polish.',
+    author: 'Elena Rostova',
+    role: 'Head of Brand Design, Aura Studio',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400&auto=format&fit=crop',
     rating: 5,
   },
   {
@@ -35,11 +35,11 @@ const TESTIMONIALS: Testimonial[] = [
     rating: 5,
   },
   {
-    id: 'elena-rostova',
-    quote: 'From UX wireframes to production deployment, HK Digital Agency brought our creative vision to life with precision and unmatched aesthetic polish.',
-    author: 'Elena Rostova',
-    role: 'Head of Brand Design, Aura Studio',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400&auto=format&fit=crop',
+    id: 'stephen-brekke',
+    quote: "If you want real marketing that works and effective implementation – mobile app's got you covered.",
+    author: 'Stephen Brekke',
+    role: 'Legacy Integration Producer',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop',
     rating: 5,
   },
   {
@@ -69,8 +69,11 @@ export const TestimonialsSection: React.FC = () => {
   const starRefs = useRef<(HTMLDivElement | null)[]>([]);
   const autoplayTimerRef = useRef<gsap.core.Tween | null>(null);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Initialize at the middle card (index 2 of 5)
+  const initialIndex = Math.floor(TESTIMONIALS.length / 2);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isInteracting, setIsInteracting] = useState(false);
+  const isFirstMountRef = useRef(true);
 
   // Drag / Swipe Tracking State
   const isDraggingRef = useRef(false);
@@ -90,14 +93,15 @@ export const TestimonialsSection: React.FC = () => {
    * Centers the active card in the viewport container.
    */
   const getCardWidthAndOffset = useCallback(() => {
-    if (!carouselContainerRef.current || !cardRefs.current[0]) {
-      return { cardWidth: 360, gap: 24, containerWidth: 1000 };
+    if (!carouselContainerRef.current) {
+      return { cardWidth: 420, gap: 24, containerWidth: 1200 };
     }
-    const containerWidth = carouselContainerRef.current.offsetWidth;
-    const cardWidth = cardRefs.current[0].offsetWidth;
-    const gap = window.innerWidth < 640 ? 16 : 24;
+    const containerWidth = carouselContainerRef.current.offsetWidth || (typeof window !== 'undefined' ? window.innerWidth : 1200);
+    const cardEl = cardRefs.current[currentIndex] || cardRefs.current[0];
+    const cardWidth = cardEl ? cardEl.offsetWidth : (typeof window !== 'undefined' && window.innerWidth < 640 ? 310 : typeof window !== 'undefined' && window.innerWidth < 768 ? 380 : 420);
+    const gap = typeof window !== 'undefined' && window.innerWidth < 640 ? 16 : 24;
     return { cardWidth, gap, containerWidth };
-  }, []);
+  }, [currentIndex]);
 
   const updateCarouselPosition = useCallback(
     (index: number, animate = true) => {
@@ -118,7 +122,7 @@ export const TestimonialsSection: React.FC = () => {
         gsap.set(carouselTrackRef.current, { x: targetX });
       }
 
-      // Update card scale & opacity visual hierarchy (middle card 1.05x, side cards 0.95x / 0.85 opacity)
+      // Update card scale & opacity visual hierarchy (middle card 1.04x, side cards 0.96x / 0.88 opacity)
       cardRefs.current.forEach((card, i) => {
         if (!card) return;
         const isCenter = i === index;
@@ -133,17 +137,31 @@ export const TestimonialsSection: React.FC = () => {
           return;
         }
 
-        gsap.to(card, {
-          scale: isCenter ? 1.04 : 0.96,
-          opacity: isCenter ? 1 : distance === 1 ? 0.88 : 0.65,
-          boxShadow: isCenter
-            ? '0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 10px 24px -6px rgba(31, 168, 44, 0.08)'
-            : '0 8px 20px -4px rgba(0, 0, 0, 0.04)',
-          zIndex: isCenter ? 25 : 10 - distance,
-          duration: 0.5,
-          ease: 'power2.out',
-          overwrite: 'auto',
-        });
+        const targetScale = isCenter ? 1.04 : 0.96;
+        const targetOpacity = isCenter ? 1 : distance === 1 ? 0.88 : 0.65;
+        const targetShadow = isCenter
+          ? '0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 10px 24px -6px rgba(31, 168, 44, 0.08)'
+          : '0 8px 20px -4px rgba(0, 0, 0, 0.04)';
+        const targetZ = isCenter ? 25 : 10 - distance;
+
+        if (animate) {
+          gsap.to(card, {
+            scale: targetScale,
+            opacity: targetOpacity,
+            boxShadow: targetShadow,
+            zIndex: targetZ,
+            duration: 0.5,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          });
+        } else {
+          gsap.set(card, {
+            scale: targetScale,
+            opacity: targetOpacity,
+            boxShadow: targetShadow,
+            zIndex: targetZ,
+          });
+        }
       });
     },
     [getCardWidthAndOffset, prefersReducedMotion]
@@ -191,6 +209,19 @@ export const TestimonialsSection: React.FC = () => {
 
   // Sync position on index change and trigger autoplay
   useEffect(() => {
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      updateCarouselPosition(currentIndex, false);
+      const frameId = requestAnimationFrame(() => {
+        updateCarouselPosition(currentIndex, false);
+      });
+      startAutoplay();
+      return () => {
+        cancelAnimationFrame(frameId);
+        pauseAutoplay();
+      };
+    }
+
     updateCarouselPosition(currentIndex, true);
     startAutoplay();
     return () => pauseAutoplay();
@@ -231,18 +262,17 @@ export const TestimonialsSection: React.FC = () => {
         );
       }
 
-      // 2. Cards entrance: fade up and scale in with stagger
+      // 2. Cards entrance: fade up with stagger (preserving scale and center alignment)
       const validCards = cardRefs.current.filter(Boolean);
       if (validCards.length > 0) {
         gsap.fromTo(
           validCards,
-          { opacity: 0, y: 40, scale: 0.92 },
+          { opacity: 0, y: 40 },
           {
-            opacity: 1,
+            opacity: (i) => (i === currentIndex ? 1 : Math.abs(i - currentIndex) === 1 ? 0.88 : 0.65),
             y: 0,
-            scale: 0.96,
             duration: 0.85,
-            stagger: 0.15,
+            stagger: 0.1,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: carouselContainerRef.current,
@@ -250,8 +280,7 @@ export const TestimonialsSection: React.FC = () => {
               toggleActions: 'play none none none',
             },
             onComplete: () => {
-              // Ensure center card assumes 1.04x scale
-              updateCarouselPosition(currentIndex, true);
+              updateCarouselPosition(currentIndex, false);
             },
           }
         );
@@ -476,7 +505,7 @@ export const TestimonialsSection: React.FC = () => {
                   }}
                   onMouseEnter={() => handleCardMouseEnter(idx)}
                   onMouseLeave={() => handleCardMouseLeave(idx)}
-                  className={`group/card relative w-[310px] sm:w-[380px] md:w-[420px] bg-white rounded-3xl p-6 sm:p-8 pt-10 sm:pt-12 flex flex-col justify-between transition-all duration-300 border border-[#EBEBEB] will-change-transform ${
+                  className={`group/card relative shrink-0 w-[310px] sm:w-[380px] md:w-[420px] bg-white rounded-3xl p-6 sm:p-8 pt-10 sm:pt-12 flex flex-col justify-between transition-all duration-300 border border-[#EBEBEB] will-change-transform ${
                     isCenter ? 'ring-1 ring-black/5' : ''
                   }`}
                   style={{ minHeight: '300px' }}
