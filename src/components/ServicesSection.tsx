@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight,
-  ChevronDown,
   Video,
   Search,
   Palette,
@@ -10,8 +9,7 @@ import {
   Sparkles,
   CheckCircle2,
   Layers,
-  Cpu,
-  MousePointerClick
+  ChevronDown
 } from 'lucide-react';
 
 /**
@@ -31,7 +29,6 @@ interface ServiceItem {
     subtext: string;
     accentColor: string;
     tiltDeg: number;
-    previewUrl?: string;
   };
 }
 
@@ -121,25 +118,11 @@ const SERVICES_DATA: ServiceItem[] = [
 /**
  * Our Services Section Component
  * 
- * Strict Implementation of Reference Image (pics 3.png) & User Requirements:
- * 1. Primary Green full-section background (glossy emerald gradient #1FA82C to #35D13F)
- * 2. 2-column top header:
- *    - Left: "Our Services" eyebrow + "What Service We're Offering" bold headline
- *    - Right: Supporting agency paragraph in light translucent white/green
- * 3. 5-item interactive accordion list:
- *    - Video Editing (default active)
- *    - SEO Service
- *    - Graphic Designing
- *    - Software Development
- *    - Digital Marketing
- * 4. Inactive items: Dark green background (#178A22) with smooth hover state and circular arrow button
- * 5. Active item: Bright white pill container, bold black text (#0A0A0A), elevated shadow, 
- *    arrow indicator transitioning with a smooth rotation/bounce
- * 6. Floating Image Panel on the right (overlapping the accordion list like in pics 3.png):
- *    - Distinctive dynamic tilt (-4deg to -5deg)
- *    - Interactive crossfade + scale/pop animation on skill change
- *    - Luminous glowing shadow pulse on update
- * 7. Accessibility (keyboard arrows/tab, ARIA attributes) and prefers-reduced-motion support
+ * Responsive Precision:
+ * - Desktop (lg+): Exactly matches reference image pics 3.png with full-width emerald gradient,
+ *   accordion items on left, and tilted floating preview card overlapping the right side.
+ * - Mobile & Tablet (<lg): Interactive accordion with inline preview reveal directly under
+ *   the tapped service. Eliminates disconnected scrolling and prevented card tilt clipping on narrow viewports.
  */
 export const ServicesSection: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -169,7 +152,7 @@ export const ServicesSection: React.FC = () => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.08 }
     );
 
     if (sectionRef.current) {
@@ -201,29 +184,218 @@ export const ServicesSection: React.FC = () => {
     }, 550);
   };
 
+  /**
+   * Reusable preview card rendering for consistent visual excellence on both mobile and desktop
+   */
+  const renderPreviewContent = (service: ServiceItem, isMobile: boolean) => (
+    <div
+      className={`relative w-full bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-[#0A0A0A] border border-white/80 transition-all duration-300 ${
+        isMobile
+          ? 'shadow-xl mt-3'
+          : 'shadow-[0_24px_50px_rgba(0,0,0,0.28),0_4px_12px_rgba(0,0,0,0.12)]'
+      }`}
+    >
+      {/* Card Header Tag & Category */}
+      <div className="flex items-center justify-between pb-3.5 border-b border-neutral-100">
+        <span className="px-2.5 sm:px-3 py-1 rounded-md bg-emerald-50 text-[#1FA82C] text-[11px] sm:text-xs font-bold uppercase tracking-wider border border-[#1FA82C]/20">
+          {service.mockup.tag}
+        </span>
+        <span className="text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+          {service.stats}
+        </span>
+      </div>
+
+      {/* Dynamic Mockup Visual Workspace */}
+      <div className="mt-4 sm:mt-5 rounded-xl sm:rounded-2xl bg-gradient-to-b from-neutral-50 to-neutral-100/70 p-3.5 sm:p-4 border border-neutral-200/70 overflow-hidden shadow-inner">
+        
+        {/* Simulated UI Window Bar */}
+        <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-neutral-200/60">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-rose-400/80" />
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-amber-400/80" />
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-400/80" />
+          </div>
+          <div className="px-2.5 py-0.5 rounded bg-white text-[10px] sm:text-[11px] font-mono text-neutral-500 border border-neutral-200 shadow-2xs">
+            hk-agency.app/{service.id}
+          </div>
+          <Sparkles className="w-3.5 h-3.5 text-[#1FA82C]" />
+        </div>
+
+        {/* Service-Specific Mockup Graphics */}
+        {service.mockup.type === 'video' && (
+          <div className="space-y-2.5 py-0.5">
+            <div className="relative aspect-video rounded-lg sm:rounded-xl bg-[#0A0A0A] overflow-hidden flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#1FA82C]/30 via-transparent to-black/80" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 shadow-lg">
+                <Video className="w-4 h-4 sm:w-5 sm:h-5 text-white fill-white/80 ml-0.5" />
+              </div>
+              <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[9px] sm:text-[10px] font-mono text-white/80">
+                <span>00:04:18 / 00:15:00</span>
+                <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-bold">4K 60FPS</span>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <div className="h-3.5 sm:h-4 rounded bg-[#1FA82C]/30 border border-[#1FA82C]/50 flex items-center px-2">
+                <span className="text-[8px] sm:text-[9px] font-mono text-emerald-900 font-bold">Video Track 01 (Color Graded)</span>
+              </div>
+              <div className="h-3.5 sm:h-4 rounded bg-neutral-300/80 flex items-center px-2">
+                <span className="text-[8px] sm:text-[9px] font-mono text-neutral-700">Audio Foley & Dialog Waveform</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {service.mockup.type === 'seo' && (
+          <div className="space-y-2.5 py-0.5">
+            <div className="p-3 rounded-lg sm:rounded-xl bg-white border border-neutral-200 shadow-xs space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold">
+                <span className="text-neutral-500">Keyword Visibility Growth</span>
+                <span className="text-[#1FA82C] font-bold">+284.6%</span>
+              </div>
+              <div className="h-14 sm:h-16 flex items-end justify-between gap-1 sm:gap-1.5 pt-1">
+                {[35, 48, 42, 60, 55, 78, 85, 92, 100].map((val, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-sm transition-all duration-300"
+                    style={{
+                      height: `${val}%`,
+                      backgroundColor: i >= 6 ? '#1FA82C' : '#D1D5DB',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-center text-[10px] sm:text-[11px]">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-50 text-emerald-800 font-medium">
+                Avg Position: <strong className="text-emerald-950">1.8</strong>
+              </div>
+              <div className="p-1.5 sm:p-2 rounded-lg bg-neutral-100 text-neutral-700 font-medium">
+                Organic Clicks: <strong className="text-neutral-900">42.8K</strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {service.mockup.type === 'design' && (
+          <div className="space-y-2.5 py-0.5">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white border border-neutral-200 flex flex-col items-center justify-center text-center shadow-xs">
+                <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-[#1FA82C] mb-1" />
+                <span className="text-[9px] sm:text-[10px] font-bold text-neutral-700">Palette</span>
+              </div>
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white border border-neutral-200 flex flex-col items-center justify-center text-center shadow-xs">
+                <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-[#35D13F] mb-1" />
+                <span className="text-[9px] sm:text-[10px] font-bold text-neutral-700">Typography</span>
+              </div>
+              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white border border-neutral-200 flex flex-col items-center justify-center text-center shadow-xs">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#1FA82C] mb-1" />
+                <span className="text-[9px] sm:text-[10px] font-bold text-neutral-700">3D Assets</span>
+              </div>
+            </div>
+            <div className="p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-white border border-neutral-200 shadow-xs">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#1FA82C]" />
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#35D13F]" />
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#0A0A0A]" />
+                <span className="text-[10px] sm:text-[11px] font-mono text-neutral-400 ml-auto">Figma Kit</span>
+              </div>
+              <p className="text-[11px] sm:text-xs font-semibold text-neutral-800">Design System V2.4</p>
+            </div>
+          </div>
+        )}
+
+        {service.mockup.type === 'dev' && (
+          <div className="space-y-2 py-0.5 font-mono text-[10px] sm:text-[11px]">
+            <div className="p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-[#0A0A0A] text-emerald-400 space-y-1 shadow-sm">
+              <div className="text-neutral-500">// TypeScript Next.js API</div>
+              <div>
+                <span className="text-purple-400">const</span>{' '}
+                <span className="text-amber-300">app</span> ={' '}
+                <span className="text-blue-400">createAgencyApp</span>();
+              </div>
+              <div>
+                <span className="text-amber-300">app</span>.
+                <span className="text-emerald-300">optimizeSpeed</span>({'{ '}
+                <span className="text-cyan-300">score</span>: 100 {'}'});
+              </div>
+              <div className="text-emerald-500/80 pt-0.5">✓ Compiled in 12ms</div>
+            </div>
+            <div className="flex items-center justify-between px-1 text-[9px] sm:text-[10px] text-neutral-500">
+              <span>Serverless Edge Route</span>
+              <span className="text-[#1FA82C] font-semibold">99.9% Uptime</span>
+            </div>
+          </div>
+        )}
+
+        {service.mockup.type === 'marketing' && (
+          <div className="space-y-2.5 py-0.5">
+            <div className="p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-white border border-neutral-200 shadow-xs">
+              <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold mb-1">
+                <span className="text-neutral-600">Campaign ROAS Ratio</span>
+                <span className="text-emerald-600 font-bold">4.82x</span>
+              </div>
+              <div className="w-full bg-neutral-100 rounded-full h-2 sm:h-2.5 overflow-hidden">
+                <div className="bg-gradient-to-r from-[#1FA82C] to-[#35D13F] h-2 sm:h-2.5 rounded-full w-[82%]" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-center text-[10px] sm:text-[11px]">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-50 text-emerald-800 font-medium">
+                Ad Spend: <strong>$12,400</strong>
+              </div>
+              <div className="p-1.5 sm:p-2 rounded-lg bg-neutral-100 text-neutral-800 font-medium">
+                Return: <strong>$59,768</strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Card Footer Detail */}
+      <div className="mt-4 sm:mt-5 space-y-2">
+        <h4 className="text-sm sm:text-base md:text-lg font-bold text-[#0A0A0A] leading-tight">
+          {service.mockup.headline}
+        </h4>
+        <p className="text-[11px] sm:text-xs md:text-[13px] text-neutral-500 leading-relaxed">
+          {service.mockup.subtext}
+        </p>
+
+        {/* Feature Checklist Tags */}
+        <div className="pt-2.5 border-t border-neutral-100 grid grid-cols-2 gap-1.5">
+          {service.features.map((feat, idx) => (
+            <div key={idx} className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-neutral-600">
+              <CheckCircle2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-[#1FA82C] shrink-0" />
+              <span className="truncate">{feat}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <section
       ref={sectionRef}
       id="services-section"
-      className="relative w-full bg-gradient-to-br from-[#1FA82C] via-[#23A92F] to-[#35D13F] text-white py-20 md:py-28 lg:py-32 overflow-hidden select-none"
+      className="relative w-full bg-gradient-to-br from-[#1FA82C] via-[#23A92F] to-[#35D13F] text-white py-16 sm:py-20 md:py-24 lg:py-32 overflow-hidden select-none"
       aria-labelledby="services-heading"
     >
       {/* Ambient background light spheres for depth */}
       <div
-        className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none"
+        className="absolute -top-32 -left-32 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-white/10 blur-3xl pointer-events-none"
         aria-hidden="true"
       />
       <div
-        className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#116919]/40 blur-3xl pointer-events-none"
+        className="absolute -bottom-40 -right-40 w-80 sm:w-[500px] h-80 sm:h-[500px] rounded-full bg-[#116919]/40 blur-3xl pointer-events-none"
         aria-hidden="true"
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* =========================================================================
-            TOP HEADER AREA (2-Column Layout matching Reference Image pics 3.png)
+            TOP HEADER AREA (Responsive 2-Column or Stacked on Mobile)
            ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end mb-14 md:mb-18">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-12 items-end mb-10 sm:mb-14 md:mb-16">
           
           {/* Left Column: Eyebrow + Big Headline */}
           <div
@@ -232,9 +404,9 @@ export const ServicesSection: React.FC = () => {
             }`}
           >
             {/* Eyebrow Label */}
-            <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <span className="inline-block w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-              <p className="text-xs sm:text-sm font-black uppercase tracking-[0.24em] text-white/95">
+              <p className="text-xs sm:text-sm font-black uppercase tracking-[0.22em] text-white/95">
                 Our Services
               </p>
             </div>
@@ -242,9 +414,9 @@ export const ServicesSection: React.FC = () => {
             {/* Main Headline */}
             <h2
               id="services-heading"
-              className="text-3xl sm:text-4xl md:text-[46px] lg:text-[50px] font-black tracking-tight leading-[1.14] text-white"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-[50px] font-black tracking-tight leading-[1.18] lg:leading-[1.12] text-white"
             >
-              What Service <br />
+              What Service <br className="hidden sm:inline" />
               We're Offering
             </h2>
           </div>
@@ -255,7 +427,7 @@ export const ServicesSection: React.FC = () => {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             }`}
           >
-            <p className="text-white/85 text-base sm:text-[17px] md:text-[18px] leading-[1.75] font-normal max-w-xl lg:ml-auto">
+            <p className="text-white/85 text-sm sm:text-base md:text-[17px] lg:text-[18px] leading-[1.7] font-normal max-w-xl lg:ml-auto">
               From SEO and UI/UX design to website development, video editing, and digital marketing,
               we provide a full suite of digital services designed to elevate your online presence,
               enhance user engagement, and drive measurable business growth.
@@ -265,13 +437,15 @@ export const ServicesSection: React.FC = () => {
         </div>
 
         {/* =========================================================================
-            LOWER AREA: Accordion List on Left + Floating Angled Preview Card on Right
+            DESKTOP LAYOUT (lg:grid):
+            Accordion pills in front (z-20/z-30), Floating Rotated Mockup Card tucked
+            behind the buttons (z-10) - strictly matching reference image pics 3.png
            ========================================================================= */}
-        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center relative">
           
-          {/* ACCORDION PILL LIST (7 Cols on desktop) */}
+          {/* Accordion Pill List (8 Columns on desktop, sits in FRONT with z-20) */}
           <div
-            className={`lg:col-span-7 flex flex-col space-y-3.5 z-10 transition-all duration-700 delay-300 ease-out ${
+            className={`lg:col-span-8 flex flex-col space-y-3.5 relative z-20 transition-all duration-700 delay-300 ease-out ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
             role="tablist"
@@ -283,268 +457,162 @@ export const ServicesSection: React.FC = () => {
               return (
                 <button
                   key={service.id}
-                  id={`service-tab-${service.id}`}
+                  id={`service-tab-desktop-${service.id}`}
                   role="tab"
                   aria-selected={isActive}
-                  aria-controls={`service-panel-${service.id}`}
+                  aria-controls={`service-panel-desktop-${service.id}`}
                   onClick={() => handleSelectService(index)}
-                  className={`group relative w-full text-left rounded-2xl md:rounded-full px-6 sm:px-8 py-4 sm:py-5 flex items-center justify-between transition-all duration-300 ease-out cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 ${
+                  className={`group relative w-full text-left rounded-full px-8 py-5 flex items-center justify-between transition-all duration-300 ease-out cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 ${
                     isActive
-                      ? 'bg-white text-[#0A0A0A] shadow-[0_16px_36px_rgba(10,10,10,0.22)] scale-[1.01] -translate-y-0.5'
-                      : 'bg-[#178A22] hover:bg-[#15801f] text-white/95 border border-white/10 hover:border-white/20'
+                      ? 'bg-white text-[#0A0A0A] shadow-[0_20px_40px_rgba(0,0,0,0.22)] scale-[1.01] -translate-y-0.5 z-30'
+                      : 'bg-[#178A22] hover:bg-[#15801f] text-white/95 border border-white/10 hover:border-white/20 z-20'
                   }`}
                 >
-                  {/* Left Title & Optional Sub-indicator */}
+                  {/* Left Title & Active Badge */}
                   <div className="flex items-center gap-4">
                     <span
-                      className={`text-lg sm:text-xl md:text-[22px] font-bold tracking-tight transition-colors duration-200 ${
+                      className={`text-xl md:text-[22px] font-bold tracking-tight transition-colors duration-200 ${
                         isActive ? 'text-[#0A0A0A]' : 'text-white'
                       }`}
                     >
                       {service.title}
                     </span>
 
-                    {/* Active Mini Badge */}
                     {isActive && (
-                      <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-[#1FA82C] text-xs font-semibold uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-[#1FA82C] text-xs font-semibold uppercase tracking-wider">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#1FA82C] animate-pulse" />
                         Active
                       </span>
                     )}
                   </div>
 
-                  {/* Right Arrow Icon Button */}
+                  {/* Right Arrow Icon Button - always in front and fully visible */}
                   <div
-                    className={`relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full transition-all duration-300 shadow-sm ${
+                    className={`relative z-30 flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 shadow-sm shrink-0 ${
                       isActive
                         ? 'bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white shadow-[0_4px_12px_rgba(31,168,44,0.45)] rotate-90'
                         : 'bg-[#0A0A0A] text-white group-hover:bg-black group-hover:scale-105'
                     }`}
                     aria-hidden="true"
                   >
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                    <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </div>
                 </button>
               );
             })}
           </div>
 
-          {/* =========================================================================
-              FLOATING PREVIEW CARD (5 Cols on desktop, overlapping with dynamic tilt)
-              Directly matching the floating rotated card in reference image pics 3.png
-             ========================================================================= */}
+          {/* Floating Overlapping Card (4 Columns, tucked BEHIND the buttons with z-10) */}
           <div
-            className={`lg:col-span-5 relative transition-all duration-700 delay-500 ease-out ${
+            className={`lg:col-span-4 relative -ml-16 xl:-ml-24 z-10 transition-all duration-700 delay-500 ease-out pointer-events-auto ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
-            {/* Background Decorative Glow behind card */}
+            {/* Background Glow */}
             <div
-              className={`absolute -inset-2 sm:-inset-4 rounded-[32px] bg-white/20 blur-xl transition-all duration-500 pointer-events-none ${
+              className={`absolute -inset-4 rounded-[36px] bg-white/20 blur-xl transition-all duration-500 pointer-events-none ${
                 pulseGlow ? 'opacity-80 scale-105' : 'opacity-40 scale-100'
               }`}
               aria-hidden="true"
             />
 
-            {/* Main Floating Card Container with subtle tilt */}
             <div
-              id={`service-panel-${activeService.id}`}
+              id={`service-panel-desktop-${activeService.id}`}
               role="tabpanel"
-              aria-labelledby={`service-tab-${activeService.id}`}
+              aria-labelledby={`service-tab-desktop-${activeService.id}`}
               style={{
                 transform: prefersReducedMotion
                   ? 'none'
                   : `rotate(${activeService.mockup.tiltDeg}deg)`,
               }}
-              className={`relative w-full max-w-md mx-auto lg:max-w-none bg-white rounded-3xl p-5 sm:p-7 text-[#0A0A0A] shadow-[0_24px_50px_rgba(0,0,0,0.28),0_4px_12px_rgba(0,0,0,0.12)] border border-white/80 transition-all duration-400 ease-out hover:rotate-0 hover:scale-[1.02] cursor-default ${
+              className={`transition-all duration-400 ease-out hover:rotate-0 hover:scale-[1.02] cursor-default ${
                 isTransitioning
                   ? 'opacity-30 scale-95 translate-y-3'
                   : 'opacity-100 scale-100 translate-y-0'
               }`}
             >
-              {/* Card Header Tag & Category */}
-              <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
-                <span className="px-3 py-1 rounded-md bg-emerald-50 text-[#1FA82C] text-xs font-bold uppercase tracking-wider border border-[#1FA82C]/20">
-                  {activeService.mockup.tag}
-                </span>
-                <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-                  {activeService.stats}
-                </span>
-              </div>
-
-              {/* Dynamic Mockup Visual Workspace */}
-              <div className="mt-5 rounded-2xl bg-gradient-to-b from-neutral-50 to-neutral-100/70 p-4 border border-neutral-200/70 overflow-hidden shadow-inner">
-                
-                {/* Simulated UI Window Bar */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-200/60">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-                  </div>
-                  <div className="px-3 py-0.5 rounded-md bg-white text-[11px] font-mono text-neutral-500 border border-neutral-200 shadow-2xs">
-                    hk-agency.app/{activeService.id}
-                  </div>
-                  <Sparkles className="w-3.5 h-3.5 text-[#1FA82C]" />
-                </div>
-
-                {/* Service-Specific Mockup Graphics */}
-                {activeService.mockup.type === 'video' && (
-                  <div className="space-y-3 py-1">
-                    {/* Video Player Canvas */}
-                    <div className="relative aspect-video rounded-xl bg-[#0A0A0A] overflow-hidden flex items-center justify-center group/screen">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-[#1FA82C]/30 via-transparent to-black/80" />
-                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 shadow-lg">
-                        <Video className="w-5 h-5 text-white fill-white/80 ml-0.5" />
-                      </div>
-                      <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-white/80">
-                        <span>00:04:18 / 00:15:00</span>
-                        <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-bold">4K 60FPS</span>
-                      </div>
-                    </div>
-                    {/* Multi-track Timeline */}
-                    <div className="space-y-1.5 pt-1">
-                      <div className="h-4 rounded-md bg-[#1FA82C]/30 border border-[#1FA82C]/50 flex items-center px-2">
-                        <span className="text-[9px] font-mono text-emerald-900 font-bold">Video Track 01 (Color Graded)</span>
-                      </div>
-                      <div className="h-4 rounded-md bg-neutral-300/80 flex items-center px-2">
-                        <span className="text-[9px] font-mono text-neutral-700">Audio Foley & Dialog Waveform</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeService.mockup.type === 'seo' && (
-                  <div className="space-y-3 py-1">
-                    <div className="p-3 rounded-xl bg-white border border-neutral-200 shadow-xs space-y-2">
-                      <div className="flex items-center justify-between text-xs font-semibold">
-                        <span className="text-neutral-500">Keyword Visibility Growth</span>
-                        <span className="text-[#1FA82C] font-bold">+284.6%</span>
-                      </div>
-                      {/* Bar graph visualization */}
-                      <div className="h-16 flex items-end justify-between gap-1.5 pt-2">
-                        {[35, 48, 42, 60, 55, 78, 85, 92, 100].map((val, i) => (
-                          <div
-                            key={i}
-                            className="flex-1 rounded-t-sm transition-all duration-300"
-                            style={{
-                              height: `${val}%`,
-                              backgroundColor: i >= 6 ? '#1FA82C' : '#D1D5DB',
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-center text-[11px]">
-                      <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 font-medium">
-                        Avg Position: <strong className="text-emerald-950">1.8</strong>
-                      </div>
-                      <div className="p-2 rounded-lg bg-neutral-100 text-neutral-700 font-medium">
-                        Organic Clicks: <strong className="text-neutral-900">42.8K</strong>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeService.mockup.type === 'design' && (
-                  <div className="space-y-3 py-1">
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="p-3 rounded-xl bg-white border border-neutral-200 flex flex-col items-center justify-center text-center shadow-xs">
-                        <Palette className="w-5 h-5 text-[#1FA82C] mb-1" />
-                        <span className="text-[10px] font-bold text-neutral-700">Palette</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-white border border-neutral-200 flex flex-col items-center justify-center text-center shadow-xs">
-                        <Layers className="w-5 h-5 text-[#35D13F] mb-1" />
-                        <span className="text-[10px] font-bold text-neutral-700">Typography</span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-white border border-neutral-200 flex flex-col items-center justify-center text-center shadow-xs">
-                        <Sparkles className="w-5 h-5 text-[#1FA82C] mb-1" />
-                        <span className="text-[10px] font-bold text-neutral-700">3D Assets</span>
-                      </div>
-                    </div>
-                    <div className="p-3 rounded-xl bg-white border border-neutral-200 shadow-xs">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <div className="w-3 h-3 rounded-full bg-[#1FA82C]" />
-                        <div className="w-3 h-3 rounded-full bg-[#35D13F]" />
-                        <div className="w-3 h-3 rounded-full bg-[#0A0A0A]" />
-                        <span className="text-[11px] font-mono text-neutral-400 ml-auto">Figma Component</span>
-                      </div>
-                      <p className="text-xs font-semibold text-neutral-800">Design System V2.4 Released</p>
-                    </div>
-                  </div>
-                )}
-
-                {activeService.mockup.type === 'dev' && (
-                  <div className="space-y-2 py-1 font-mono text-[11px]">
-                    <div className="p-3 rounded-xl bg-[#0A0A0A] text-emerald-400 space-y-1 shadow-sm">
-                      <div className="text-neutral-500">// TypeScript Next.js API</div>
-                      <div>
-                        <span className="text-purple-400">const</span>{' '}
-                        <span className="text-amber-300">app</span> ={' '}
-                        <span className="text-blue-400">createAgencyApp</span>();
-                      </div>
-                      <div>
-                        <span className="text-amber-300">app</span>.
-                        <span className="text-emerald-300">optimizeSpeed</span>({'{ '}
-                        <span className="text-cyan-300">score</span>: 100 {'}'});
-                      </div>
-                      <div className="text-emerald-500/80 pt-1">✓ Compiled in 12ms [production]</div>
-                    </div>
-                    <div className="flex items-center justify-between px-2 text-[10px] text-neutral-500">
-                      <span>Serverless Edge Route</span>
-                      <span className="text-[#1FA82C] font-semibold">99.9% Uptime</span>
-                    </div>
-                  </div>
-                )}
-
-                {activeService.mockup.type === 'marketing' && (
-                  <div className="space-y-3 py-1">
-                    <div className="p-3 rounded-xl bg-white border border-neutral-200 shadow-xs">
-                      <div className="flex items-center justify-between text-xs font-semibold mb-1">
-                        <span className="text-neutral-600">Campaign ROAS Ratio</span>
-                        <span className="text-emerald-600 font-bold">4.82x</span>
-                      </div>
-                      <div className="w-full bg-neutral-100 rounded-full h-2.5 overflow-hidden">
-                        <div className="bg-gradient-to-r from-[#1FA82C] to-[#35D13F] h-2.5 rounded-full w-[82%]" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-center text-[11px]">
-                      <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 font-medium">
-                        Ad Spend: <strong>$12,400</strong>
-                      </div>
-                      <div className="p-2 rounded-lg bg-neutral-100 text-neutral-800 font-medium">
-                        Return: <strong>$59,768</strong>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-
-              {/* Card Footer Detail */}
-              <div className="mt-5 space-y-2">
-                <h4 className="text-base sm:text-lg font-bold text-[#0A0A0A] leading-tight">
-                  {activeService.mockup.headline}
-                </h4>
-                <p className="text-xs sm:text-[13px] text-neutral-500 leading-relaxed">
-                  {activeService.mockup.subtext}
-                </p>
-
-                {/* Feature Checklist Tags */}
-                <div className="pt-3 border-t border-neutral-100 grid grid-cols-2 gap-1.5">
-                  {activeService.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-center gap-1.5 text-[11px] text-neutral-600">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1FA82C] shrink-0" />
-                      <span className="truncate">{feat}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+              {renderPreviewContent(activeService, false)}
             </div>
-
           </div>
 
+        </div>
+
+        {/* =========================================================================
+            MOBILE & TABLET LAYOUT (<lg):
+            Tactile inline accordion where tapping ANY service expands its preview
+            right in place! Eliminates disconnected scrolling and prevents card tilt clipping.
+           ========================================================================= */}
+        <div className="lg:hidden flex flex-col space-y-3.5" role="tablist" aria-label="HK Digital Agency Services Mobile">
+          {SERVICES_DATA.map((service, index) => {
+            const isActive = index === activeIndex;
+
+            return (
+              <div
+                key={service.id}
+                className="w-full transition-all duration-300"
+              >
+                {/* Accordion Tab Button */}
+                <button
+                  id={`service-tab-mobile-${service.id}`}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`service-panel-mobile-${service.id}`}
+                  onClick={() => handleSelectService(index)}
+                  className={`w-full text-left rounded-2xl px-5 sm:px-6 py-4 flex items-center justify-between transition-all duration-300 ease-out cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 min-h-[56px] ${
+                    isActive
+                      ? 'bg-white text-[#0A0A0A] shadow-[0_12px_28px_rgba(10,10,10,0.2)]'
+                      : 'bg-[#178A22] hover:bg-[#15801f] text-white border border-white/10'
+                  }`}
+                >
+                  {/* Title & Active Dot */}
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`text-base sm:text-lg font-bold tracking-tight ${
+                        isActive ? 'text-[#0A0A0A]' : 'text-white'
+                      }`}
+                    >
+                      {service.title}
+                    </span>
+
+                    {isActive && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-[#1FA82C] text-[10px] font-bold uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#1FA82C] animate-pulse" />
+                        Active
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Right Arrow Button with rotation */}
+                  <div
+                    className={`relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-all duration-300 shadow-sm shrink-0 ml-2 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white shadow-[0_2px_8px_rgba(31,168,44,0.4)] rotate-90'
+                        : 'bg-[#0A0A0A] text-white'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </div>
+                </button>
+
+                {/* Inline Expanded Preview Card on Mobile */}
+                {isActive && (
+                  <div
+                    id={`service-panel-mobile-${service.id}`}
+                    role="tabpanel"
+                    aria-labelledby={`service-tab-mobile-${service.id}`}
+                    className={`transition-all duration-300 ease-out pt-1.5 ${
+                      isTransitioning
+                        ? 'opacity-40 scale-[0.98]'
+                        : 'opacity-100 scale-100'
+                    }`}
+                  >
+                    {renderPreviewContent(service, true)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
       </div>

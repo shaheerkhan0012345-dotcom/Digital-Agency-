@@ -1,6 +1,6 @@
 {
   "name": "HK Digital Agency - Hero Section",
-  "description": "A modern digital agency experience for HK Digital Agency featuring navigation, team showcase with marquee ribbons, scroll-scrubbed About Us, and an interactive Our Services section with floating preview cards.",
+  "description": "A modern digital agency experience for HK Digital Agency featuring navigation, team showcase with marquee ribbons, scroll-scrubbed About Us, interactive Our Services, GSAP-powered portfolio showcase, and What Our Clients Say testimonial carousel.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

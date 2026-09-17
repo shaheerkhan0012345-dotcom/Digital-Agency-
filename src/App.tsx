@@ -4,6 +4,8 @@ import { HeroSection } from './components/HeroSection';
 import { MarqueeStrips } from './components/MarqueeStrips';
 import { AboutSection } from './components/AboutSection';
 import { ServicesSection } from './components/ServicesSection';
+import { ProjectsSection } from './components/ProjectsSection';
+import { TestimonialsSection } from './components/TestimonialsSection';
 
 /**
  * HK Digital Agency Experience
@@ -14,6 +16,8 @@ import { ServicesSection } from './components/ServicesSection';
  * 3. Dual Skewed Crossing Marquee Ribbons with requested skills
  * 4. Interactive "About Us" Section with scroll-scrubbed highlight text reveal
  * 5. Interactive "Our Services" Section with dynamic accordion and tilted mockup panel (pics 3.png)
+ * 6. Interactive "Our Project" Portfolio Section with GSAP animations and modal lightbox (pics 4.png)
+ * 7. "What Our Clients Say" Testimonials Section with GSAP carousel (pics 5.png)
  */
 export default function App() {
   return (
@@ -34,6 +38,12 @@ export default function App() {
 
         {/* Interactive "Our Services" Section with Angled Mockup Card */}
         <ServicesSection />
+
+        {/* Interactive "Our Project" Portfolio Section */}
+        <ProjectsSection />
+
+        {/* Interactive "What Our Clients Say" Testimonials Section */}
+        <TestimonialsSection />
       </main>
     </div>
   );
