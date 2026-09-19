@@ -234,7 +234,7 @@ export const AboutSection: React.FC = () => {
 
               <h3
                 ref={headingRef}
-                className="relative text-2xl sm:text-3xl md:text-[34px] lg:text-[41px] font-bold tracking-[-0.03em] leading-[1.3] select-none"
+                className="relative text-2xl sm:text-3xl md:text-[34px] lg:text-[41px] font-display font-bold tracking-[-0.03em] leading-[1.3] select-none"
               >
                 {HEADING_TOKENS.map((token, index) => {
                   // Continuous fractional progress per word for silky transition
@@ -289,7 +289,7 @@ export const AboutSection: React.FC = () => {
                 2. ENHANCED SMALL TEXT / AGENCY DESCRIPTION
                 Crafted editorial layout with interactive domain highlights & hover states
                ========================================================================= */}
-            <div className="relative group/card rounded-2xl p-6 sm:p-8 bg-gradient-to-br from-neutral-50/90 via-white to-neutral-50/50 border border-neutral-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgba(31,168,44,0.08)] hover:border-[#1FA82C]/30 transition-all duration-500">
+            <div className="relative group/card rounded-2xl p-6 sm:p-8 bg-gradient-to-br from-neutral-50/90 via-white to-neutral-50/50 border border-neutral-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-hover-elevate transition-all duration-500">
               
               {/* Left accent indicator bar */}
               <div className="absolute left-0 top-6 bottom-6 w-1 rounded-r-full bg-neutral-200 group-hover/card:bg-gradient-to-b group-hover/card:from-[#1FA82C] group-hover/card:to-[#35D13F] transition-all duration-500" />
@@ -352,7 +352,7 @@ export const AboutSection: React.FC = () => {
               <a
                 id="about-cta-btn"
                 href="#contact"
-                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full text-[15px] font-semibold text-white bg-[#0A0A0A] hover:bg-gradient-to-r hover:from-[#1FA82C] hover:to-[#35D13F] transition-all duration-300 shadow-md hover:shadow-[0_10px_28px_rgba(31,168,44,0.38)] hover:scale-[1.03] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1FA82C]"
+                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full text-[15px] font-semibold text-white bg-[#0A0A0A] hover:bg-gradient-to-r hover:from-[#1FA82C] hover:to-[#35D13F] transition-all duration-300 shadow-md hover:shadow-[0_10px_28px_rgba(31,168,44,0.38)] hover:scale-[1.03] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1FA82C] btn-shine-sweep"
               >
                 <span>Contact Us</span>
                 <div className="relative flex items-center justify-center w-5 h-5 rounded-full bg-white/15 group-hover:bg-white/25 transition-colors">

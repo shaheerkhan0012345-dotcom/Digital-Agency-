@@ -11,6 +11,10 @@ import {
   Layers,
   ChevronDown
 } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Service Item Data Contract
@@ -128,10 +132,15 @@ export const ServicesSection: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [pulseGlow, setPulseGlow] = useState<boolean>(false);
-  const [isVisible, setIsVisible] = useState<boolean>(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
 
   const sectionRef = useRef<HTMLElement>(null);
+  const headingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const paragraphRef = useRef<HTMLParagraphElement>(null);
+  const accordionButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const previewCardInnerRef = useRef<HTMLDivElement>(null);
+
   const activeService = SERVICES_DATA[activeIndex];
 
   // Motion preference detection
@@ -144,23 +153,83 @@ export const ServicesSection: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
-  // Section entrance observer
+  // GSAP ScrollTrigger Entrance Animations
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.08 }
-    );
+    if (prefersReducedMotion) return;
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 75%',
+          toggleActions: 'play none none none',
+        },
+      });
 
-    return () => observer.disconnect();
-  }, []);
+      // 1. Heading Split Text Mask Reveal
+      const validWords = headingWordRefs.current.filter(Boolean);
+      if (validWords.length > 0) {
+        tl.fromTo(
+          validWords,
+          { y: 45, opacity: 0, rotateX: -25 },
+          {
+            y: 0,
+            opacity: 1,
+            rotateX: 0,
+            duration: 0.85,
+            stagger: 0.07,
+            ease: 'power4.out',
+          },
+          0
+        );
+      }
+
+      // 2. Paragraph Slide In
+      if (paragraphRef.current) {
+        tl.fromTo(
+          paragraphRef.current,
+          { y: 30, opacity: 0, filter: 'blur(4px)' },
+          { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.9, ease: 'power3.out' },
+          0.2
+        );
+      }
+
+      // 3. Staggered Accordion Items Entrance
+      const validButtons = accordionButtonRefs.current.filter(Boolean);
+      if (validButtons.length > 0) {
+        tl.fromTo(
+          validButtons,
+          { x: -40, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.75,
+            stagger: 0.08,
+            ease: 'back.out(1.4)',
+          },
+          0.3
+        );
+      }
+
+      // 4. Floating Preview Card Reveal
+      if (previewContainerRef.current) {
+        tl.fromTo(
+          previewContainerRef.current,
+          { scale: 0.88, opacity: 0, y: 60 },
+          {
+            scale: 1,
+            opacity: 1,
+            y: 0,
+            duration: 1.1,
+            ease: 'power3.out',
+          },
+          0.45
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
 
   // Handle service switch with tactile crossfade & pop animation
   const handleSelectService = (index: number) => {
@@ -182,6 +251,39 @@ export const ServicesSection: React.FC = () => {
     setTimeout(() => {
       setPulseGlow(false);
     }, 550);
+  };
+
+  // 3D Cursor Tilt on Desktop Preview Card
+  const handlePreviewMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion || !previewCardInnerRef.current) return;
+    const rect = previewCardInnerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+
+    gsap.to(previewCardInnerRef.current, {
+      rotateX,
+      rotateY,
+      transformPerspective: 1000,
+      duration: 0.35,
+      ease: 'power1.out',
+      overwrite: 'auto',
+    });
+  };
+
+  const handlePreviewMouseLeave = () => {
+    if (prefersReducedMotion || !previewCardInnerRef.current) return;
+    gsap.to(previewCardInnerRef.current, {
+      rotateX: 0,
+      rotateY: 0,
+      duration: 0.6,
+      ease: 'power2.out',
+      overwrite: 'auto',
+    });
   };
 
   /**
@@ -398,11 +500,7 @@ export const ServicesSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-12 items-end mb-10 sm:mb-14 md:mb-16">
           
           {/* Left Column: Eyebrow + Big Headline */}
-          <div
-            className={`lg:col-span-6 transition-all duration-700 ease-out ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}
-          >
+          <div className="lg:col-span-6">
             {/* Eyebrow Label */}
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <span className="inline-block w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
@@ -411,23 +509,61 @@ export const ServicesSection: React.FC = () => {
               </p>
             </div>
 
-            {/* Main Headline */}
+            {/* Main Headline with Split Word Animation Masks */}
             <h2
               id="services-heading"
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-[50px] font-black tracking-tight leading-[1.18] lg:leading-[1.12] text-white"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-[50px] font-display font-black tracking-tight leading-[1.18] lg:leading-[1.12] text-white flex flex-wrap items-baseline gap-x-2.5"
             >
-              What Service <br className="hidden sm:inline" />
-              We're Offering
+              <span className="overflow-hidden inline-block py-1">
+                <span
+                  ref={(el) => {
+                    headingWordRefs.current[0] = el;
+                  }}
+                  className="inline-block will-change-transform"
+                >
+                  What
+                </span>
+              </span>
+              <span className="overflow-hidden inline-block py-1">
+                <span
+                  ref={(el) => {
+                    headingWordRefs.current[1] = el;
+                  }}
+                  className="inline-block will-change-transform"
+                >
+                  Service
+                </span>
+              </span>
+              <br className="hidden sm:inline w-full" />
+              <span className="overflow-hidden inline-block py-1">
+                <span
+                  ref={(el) => {
+                    headingWordRefs.current[2] = el;
+                  }}
+                  className="inline-block will-change-transform"
+                >
+                  We're
+                </span>
+              </span>
+              <span className="overflow-hidden inline-block py-1">
+                <span
+                  ref={(el) => {
+                    headingWordRefs.current[3] = el;
+                  }}
+                  className="inline-block will-change-transform text-emerald-100"
+                >
+                  Offering
+                </span>
+              </span>
             </h2>
           </div>
 
           {/* Right Column: Paragraph Intro Line */}
-          <div
-            className={`lg:col-span-6 transition-all duration-700 delay-150 ease-out ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}
-          >
-            <p className="text-white/85 text-sm sm:text-base md:text-[17px] lg:text-[18px] leading-[1.7] font-normal max-w-xl lg:ml-auto">
+          <div className="lg:col-span-6">
+            <p
+              ref={paragraphRef}
+              className="text-white/90 text-sm sm:text-base md:text-[17px] lg:text-[18px] leading-[1.7] font-normal max-w-xl lg:ml-auto will-change-transform"
+            >
               From SEO and UI/UX design to website development, video editing, and digital marketing,
               we provide a full suite of digital services designed to elevate your online presence,
               enhance user engagement, and drive measurable business growth.
@@ -438,16 +574,14 @@ export const ServicesSection: React.FC = () => {
 
         {/* =========================================================================
             DESKTOP LAYOUT (lg:grid):
-            Accordion pills in front (z-20/z-30), Floating Rotated Mockup Card tucked
-            behind the buttons (z-10) - strictly matching reference image pics 3.png
+            Accordion pills on left (6 cols, z-20), Floating Rotated Mockup Card positioned
+            to the right side (6 cols, z-10) with generous breathing space
            ========================================================================= */}
-        <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center relative">
+        <div className="hidden lg:grid lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12 items-center relative">
           
-          {/* Accordion Pill List (8 Columns on desktop, sits in FRONT with z-20) */}
+          {/* Accordion Pill List (6 Columns on desktop, sits in FRONT with z-20) */}
           <div
-            className={`lg:col-span-8 flex flex-col space-y-3.5 relative z-20 transition-all duration-700 delay-300 ease-out ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
+            className="lg:col-span-6 xl:col-span-6 flex flex-col space-y-3.5 relative z-20"
             role="tablist"
             aria-label="HK Digital Agency Services"
           >
@@ -457,21 +591,24 @@ export const ServicesSection: React.FC = () => {
               return (
                 <button
                   key={service.id}
+                  ref={(el) => {
+                    accordionButtonRefs.current[index] = el;
+                  }}
                   id={`service-tab-desktop-${service.id}`}
                   role="tab"
                   aria-selected={isActive}
                   aria-controls={`service-panel-desktop-${service.id}`}
                   onClick={() => handleSelectService(index)}
-                  className={`group relative w-full text-left rounded-full px-8 py-5 flex items-center justify-between transition-all duration-300 ease-out cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 ${
+                  className={`group relative w-full text-left rounded-full px-6 xl:px-8 py-4.5 xl:py-5 flex items-center justify-between transition-all duration-300 ease-out cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60 btn-shine-sweep ${
                     isActive
-                      ? 'bg-white text-[#0A0A0A] shadow-[0_20px_40px_rgba(0,0,0,0.22)] scale-[1.01] -translate-y-0.5 z-30'
-                      : 'bg-[#178A22] hover:bg-[#15801f] text-white/95 border border-white/10 hover:border-white/20 z-20'
+                      ? 'bg-white text-[#0A0A0A] shadow-[0_20px_40px_rgba(0,0,0,0.22)] scale-[1.015] -translate-y-0.5 z-30 ring-2 ring-white/50'
+                      : 'bg-[#178A22] hover:bg-[#15801f] text-white/95 border border-white/10 hover:border-white/30 hover:scale-[1.01] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)] z-20'
                   }`}
                 >
                   {/* Left Title & Active Badge */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 xl:gap-4 min-w-0">
                     <span
-                      className={`text-xl md:text-[22px] font-bold tracking-tight transition-colors duration-200 ${
+                      className={`text-lg xl:text-[22px] font-display font-bold tracking-tight whitespace-nowrap transition-colors duration-200 ${
                         isActive ? 'text-[#0A0A0A]' : 'text-white'
                       }`}
                     >
@@ -479,34 +616,35 @@ export const ServicesSection: React.FC = () => {
                     </span>
 
                     {isActive && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-[#1FA82C] text-xs font-semibold uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 xl:px-3 py-0.5 rounded-full bg-emerald-100 text-[#1FA82C] text-[11px] xl:text-xs font-semibold uppercase tracking-wider shrink-0 font-mono-stat">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#1FA82C] animate-pulse" />
                         Active
                       </span>
                     )}
                   </div>
 
-                  {/* Right Arrow Icon Button - always in front and fully visible */}
+                  {/* Right Arrow Icon Button - with responsive glide */}
                   <div
-                    className={`relative z-30 flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 shadow-sm shrink-0 ${
+                    className={`relative z-30 flex items-center justify-center w-10 h-10 xl:w-11 xl:h-11 rounded-full transition-all duration-300 shadow-sm shrink-0 ml-3 ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white shadow-[0_4px_12px_rgba(31,168,44,0.45)] rotate-90'
-                        : 'bg-[#0A0A0A] text-white group-hover:bg-black group-hover:scale-105'
+                        ? 'bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white shadow-[0_4px_12px_rgba(31,168,44,0.45)] rotate-90 scale-105'
+                        : 'bg-[#0A0A0A] text-white group-hover:bg-black group-hover:scale-110 group-hover:shadow-md'
                     }`}
                     aria-hidden="true"
                   >
-                    <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                    <ArrowRight className="w-4.5 h-4.5 xl:w-5 xl:h-5 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Floating Overlapping Card (4 Columns, tucked BEHIND the buttons with z-10) */}
+          {/* Floating Card positioned to the right side (6 Columns, z-10) */}
           <div
-            className={`lg:col-span-4 relative -ml-16 xl:-ml-24 z-10 transition-all duration-700 delay-500 ease-out pointer-events-auto ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}
+            ref={previewContainerRef}
+            className="lg:col-span-6 xl:col-span-6 relative z-10 lg:pl-4 xl:pl-8 lg:translate-x-3 xl:translate-x-6 will-change-transform perspective-1000"
+            onMouseMove={handlePreviewMouseMove}
+            onMouseLeave={handlePreviewMouseLeave}
           >
             {/* Background Glow */}
             <div
@@ -517,6 +655,7 @@ export const ServicesSection: React.FC = () => {
             />
 
             <div
+              ref={previewCardInnerRef}
               id={`service-panel-desktop-${activeService.id}`}
               role="tabpanel"
               aria-labelledby={`service-tab-desktop-${activeService.id}`}
@@ -524,8 +663,9 @@ export const ServicesSection: React.FC = () => {
                 transform: prefersReducedMotion
                   ? 'none'
                   : `rotate(${activeService.mockup.tiltDeg}deg)`,
+                transformStyle: 'preserve-3d',
               }}
-              className={`transition-all duration-400 ease-out hover:rotate-0 hover:scale-[1.02] cursor-default ${
+              className={`w-full max-w-[480px] xl:max-w-[520px] ml-auto transition-all duration-400 ease-out hover:rotate-0 hover:scale-[1.02] cursor-default will-change-transform ${
                 isTransitioning
                   ? 'opacity-30 scale-95 translate-y-3'
                   : 'opacity-100 scale-100 translate-y-0'

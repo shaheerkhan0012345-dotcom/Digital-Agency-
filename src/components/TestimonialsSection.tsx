@@ -63,6 +63,8 @@ const TESTIMONIALS: Testimonial[] = [
 export const TestimonialsSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const titleWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const headerParagraphRef = useRef<HTMLParagraphElement>(null);
   const carouselContainerRef = useRef<HTMLDivElement>(null);
   const carouselTrackRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
@@ -243,15 +245,38 @@ export const TestimonialsSection: React.FC = () => {
     if (prefersReducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // 1. Header fade-up on scroll
-      if (headerRef.current) {
+      // 1. Header split text and paragraph reveal on scroll
+      const validTitleWords = titleWordRefs.current.filter(Boolean);
+      if (validTitleWords.length > 0) {
         gsap.fromTo(
-          headerRef.current,
-          { opacity: 0, y: 35 },
+          validTitleWords,
+          { opacity: 0, y: 35, rotateX: -20 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.9,
+            rotateX: 0,
+            duration: 0.8,
+            stagger: 0.08,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: 'top 85%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }
+
+      if (headerParagraphRef.current) {
+        gsap.fromTo(
+          headerParagraphRef.current,
+          { opacity: 0, y: 25, filter: 'blur(4px)' },
+          {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.85,
+            delay: 0.25,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: headerRef.current,
@@ -456,11 +481,25 @@ export const TestimonialsSection: React.FC = () => {
         <div ref={headerRef} className="text-center max-w-3xl mx-auto mb-14 md:mb-18">
           <div className="inline-flex items-center justify-center gap-2 mb-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#1FA82C] shadow-[0_0_8px_#35D13F]" />
-            <h2 className="text-2xl sm:text-3xl md:text-[34px] font-extrabold tracking-tight text-[#0A0A0A]">
-              What Our Clients Say
+            <h2 className="text-2xl sm:text-3xl md:text-[36px] font-display font-black tracking-tight text-[#0A0A0A] flex flex-wrap justify-center gap-x-2">
+              {['What', 'Our', 'Clients', 'Say'].map((word, wordIdx) => (
+                <span key={wordIdx} className="overflow-hidden inline-block py-1">
+                  <span
+                    ref={(el) => {
+                      titleWordRefs.current[wordIdx] = el;
+                    }}
+                    className="inline-block will-change-transform"
+                  >
+                    {word}
+                  </span>
+                </span>
+              ))}
             </h2>
           </div>
-          <p className="text-[#6B6B6B] text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
+          <p
+            ref={headerParagraphRef}
+            className="text-[#6B6B6B] text-sm sm:text-base md:text-[17px] leading-relaxed max-w-2xl mx-auto will-change-transform"
+          >
             Hear from our satisfied clients who have experienced firsthand the impact of our digital solutions.
             From enhanced online visibility to seamless user experiences, our work has helped businesses grow,
             engage audiences, and achieve their goals. Discover how we've transformed ideas into success stories.
@@ -505,8 +544,8 @@ export const TestimonialsSection: React.FC = () => {
                   }}
                   onMouseEnter={() => handleCardMouseEnter(idx)}
                   onMouseLeave={() => handleCardMouseLeave(idx)}
-                  className={`group/card relative shrink-0 w-[310px] sm:w-[380px] md:w-[420px] bg-white rounded-3xl p-6 sm:p-8 pt-10 sm:pt-12 flex flex-col justify-between transition-all duration-300 border border-[#EBEBEB] will-change-transform ${
-                    isCenter ? 'ring-1 ring-black/5' : ''
+                  className={`group/card relative shrink-0 w-[310px] sm:w-[380px] md:w-[420px] bg-white rounded-3xl p-6 sm:p-8 pt-10 sm:pt-12 flex flex-col justify-between transition-all duration-300 border border-[#EBEBEB] will-change-transform card-hover-elevate ${
+                    isCenter ? 'ring-1 ring-black/5 shadow-[0_20px_45px_rgba(0,0,0,0.08)]' : 'shadow-[0_8px_20px_rgba(0,0,0,0.03)]'
                   }`}
                   style={{ minHeight: '300px' }}
                 >
@@ -531,7 +570,7 @@ export const TestimonialsSection: React.FC = () => {
                     {[...Array(5)].map((_, starIdx) => (
                       <div key={starIdx} className="star-icon inline-flex will-change-transform">
                         <Star
-                          className="w-4 h-4 sm:w-5 sm:h-5 fill-[#1FA82C] text-[#35D13F] stroke-none drop-shadow-[0_1px_4px_rgba(31,168,44,0.35)]"
+                          className="w-4 h-4 sm:w-5 sm:h-5 fill-[#1FA82C] text-[#35D13F] stroke-none drop-shadow-[0_1px_4px_rgba(31,168,44,0.35)] transition-transform duration-200 group-hover/card:scale-110"
                         />
                       </div>
                     ))}
@@ -547,7 +586,7 @@ export const TestimonialsSection: React.FC = () => {
                   {/* Bottom Info: Author Name + Title & "Testimonial" Badge Pill */}
                   <div className="flex items-end justify-between pt-6 mt-4 border-t border-[#F0F0F0]">
                     <div>
-                      <h3 className="text-base sm:text-lg font-bold text-[#0A0A0A] leading-tight">
+                      <h3 className="text-base sm:text-lg font-display font-bold text-[#0A0A0A] leading-tight">
                         {testimonial.author}
                       </h3>
                       <p className="text-xs sm:text-sm text-[#6B6B6B] mt-0.5 font-normal">
@@ -581,14 +620,14 @@ export const TestimonialsSection: React.FC = () => {
             <button
               onClick={prevSlide}
               aria-label="Previous testimonial"
-              className="w-11 h-11 rounded-full bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white flex items-center justify-center shadow-[0_4px_14px_rgba(31,168,44,0.35)] hover:shadow-[0_0_20px_rgba(53,209,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-[#1FA82C]/40"
+              className="w-11 h-11 rounded-full bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white flex items-center justify-center shadow-[0_4px_14px_rgba(31,168,44,0.35)] hover:shadow-[0_0_20px_rgba(53,209,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-[#1FA82C]/40 btn-shine-sweep"
             >
               <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
             </button>
             <button
               onClick={nextSlide}
               aria-label="Next testimonial"
-              className="w-11 h-11 rounded-full bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white flex items-center justify-center shadow-[0_4px_14px_rgba(31,168,44,0.35)] hover:shadow-[0_0_20px_rgba(53,209,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-[#1FA82C]/40"
+              className="w-11 h-11 rounded-full bg-gradient-to-r from-[#1FA82C] to-[#35D13F] text-white flex items-center justify-center shadow-[0_4px_14px_rgba(31,168,44,0.35)] hover:shadow-[0_0_20px_rgba(53,209,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-[#1FA82C]/40 btn-shine-sweep"
             >
               <ChevronRight className="w-5 h-5 stroke-[2.5]" />
             </button>

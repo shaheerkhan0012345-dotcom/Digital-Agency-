@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
 import { gsap } from 'gsap';
+import { HKLogo } from './HKLogo';
 
 /**
  * HeroSection Component
@@ -228,23 +229,19 @@ export const HeroSection: React.FC = () => {
             1. BADGE: Green Sparkle Icon with GSAP Spin Loop & Spring Entrance
            ========================================================================= */}
         <div ref={badgeRef} className="mb-6 opacity-0">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50/80 border border-[#1FA82C]/20 shadow-xs hover:border-[#1FA82C]/40 transition-colors">
-            {/* SVG 4-point sparkle rotated via GSAP */}
-            <span
-              ref={sparkleIconRef}
-              className="relative flex items-center justify-center w-5 h-5 text-[#1FA82C]"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-4 h-4 drop-shadow-sm"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" />
-              </svg>
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50/90 border border-[#1FA82C]/25 shadow-xs hover:border-[#1FA82C]/50 transition-colors">
+            {/* HK Brand Logo Icon */}
+            <span className="relative flex items-center justify-center w-5 h-5">
+              <HKLogo className="w-full h-full" showGlow={false} />
             </span>
             <span className="text-xs font-bold uppercase tracking-widest text-[#1FA82C]">
               HK Digital Agency
+            </span>
+            <span
+              ref={sparkleIconRef}
+              className="relative flex items-center justify-center w-3.5 h-3.5 text-[#1FA82C]/70"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
             </span>
           </div>
         </div>
@@ -312,7 +309,7 @@ export const HeroSection: React.FC = () => {
           <h1
             ref={wordsContainerRef}
             id="hero-main-heading"
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] font-extrabold text-[#0A0A0A] tracking-[-0.035em] leading-[1.08] flex flex-wrap justify-center items-baseline"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] font-display font-extrabold text-[#0A0A0A] tracking-[-0.035em] leading-[1.08] flex flex-wrap justify-center items-baseline"
           >
             {headlineWords.map((word, idx) => (
               <span

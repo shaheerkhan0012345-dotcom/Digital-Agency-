@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  /* Distinctive agency display headings */
+  h1, h2, h3, .font-display {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.03em;
+  }
+
+  .font-mono-stat {
+    font-family: 'Space Grotesk', monospace;
+    letter-spacing: -0.02em;
+  }
+}
+
 @layer utilities {
   /* Subtle geometric watermark pattern matching the reference hero background */
   .bg-hero-pattern {
@@ -59,12 +84,84 @@
 
   /* Button glossy shine */
   .btn-glossy-shadow {
+    position: relative;
+    overflow: hidden;
     box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.45), 0 4px 16px rgba(31, 168, 44, 0.35);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .btn-glossy-shadow:hover {
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 8px 24px rgba(31, 168, 44, 0.45);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 8px 26px rgba(31, 168, 44, 0.45);
+    transform: translateY(-1.5px);
   }
+
+  /* Specular Light Sweep on Buttons */
+  .btn-shine-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-shine-sweep::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.28) 50%,
+      transparent 100%
+    );
+    transform: skewX(-20deg);
+    transition: left 0.75s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .btn-shine-sweep:hover::before {
+    left: 140%;
+  }
+
+  /* Professional Card Elevation & Micro-Glow */
+  .card-hover-elevate {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  }
+
+  .card-hover-elevate:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 0 25px -5px rgba(31, 168, 44, 0.15);
+  }
+
+  /* Dark Card Specular Glow */
+  .dark-card-hover {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  }
+
+  .dark-card-hover:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(31, 168, 44, 0.25);
+  }
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c2c2c2;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1fa82c;
 }
 
 /* -------------------------------------------------------------
@@ -177,5 +274,108 @@
 
 .nav-link-item:hover::after {
   width: 100%;
+}
+
+/* -------------------------------------------------------------
+   BUBBLE GUM BRAND LOADER (Adapted to HK Digital Agency Theme)
+   --c_01: #1FA82C (Brand Green with #35D13F gradient glow)
+   --c_02: #0A0A0A (Dark Black Background)
+   --c_03: #FFFFFF (White highlight)
+   ------------------------------------------------------------- */
+:root {
+  --loader-c-01: #1FA82C;
+  --loader-c-01-glow: #35D13F;
+  --loader-c-02: #0A0A0A;
+  --loader-c-03: #FFFFFF;
+
+  --loader-size: clamp(42px, 11vmin, 84px);
+  --loader-w: calc(var(--loader-size) * 6);
+  --loader-h: calc(var(--loader-size) * 2.3);
+  --loader-bubble: calc(var(--loader-size) * 1.5);
+  --loader-shine: calc(var(--loader-size) / 5);
+}
+
+.hk-bubble-loader {
+  width: var(--loader-w);
+  height: var(--loader-h);
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.hk-bubble {
+  width: var(--loader-bubble);
+  height: var(--loader-bubble);
+  animation: hkBubbleBlow 1.6s linear alternate infinite;
+  background-color: var(--loader-c-01);
+  background-image: radial-gradient(circle at 35% 35%, #35D13F 0%, #1FA82C 70%, #178a23 100%);
+  border-radius: 50%;
+  position: absolute;
+  bottom: calc(var(--loader-size) / 1.5);
+  left: 50%;
+  margin-left: calc(var(--loader-bubble) / -2);
+  transform: scale(0.5) translateY(50%);
+  outline: 1px solid transparent;
+  box-shadow: 0 0 35px rgba(31, 168, 44, 0.45);
+}
+
+.hk-bubble__shine {
+  background-color: var(--loader-c-03);
+  position: absolute;
+}
+
+.hk-bubble__shine--lg {
+  width: var(--loader-shine);
+  height: calc(var(--loader-shine) * 2.5);
+  border-radius: 100% 50% 40% 100% / 50% 30% 30% 100%;
+  top: 2%;
+  left: 26%;
+  transform: rotateZ(60deg);
+}
+
+.hk-bubble__shine--sm {
+  width: calc(var(--loader-shine) / 2);
+  height: calc(var(--loader-shine) / 2);
+  border-radius: 50% 50% 40% 100% / 50% 50% 50% 100%;
+  top: 32%;
+  left: 9%;
+}
+
+.hk-bubble-text {
+  align-self: flex-end;
+  color: var(--loader-c-01);
+  font-family: "Major Mono Display", monospace;
+  font-size: var(--loader-size);
+  margin: 0;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+.hk-bubble-text__highlight {
+  color: var(--loader-c-03);
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.4);
+}
+
+@keyframes hkBubbleBlow {
+  0% {
+    transform: scale(0.5) translateY(50%);
+  }
+  20% {
+    transform: scale(0.6) translateY(33%);
+  }
+  40% {
+    transform: scale(0.7) translateY(21%);
+  }
+  60% {
+    transform: scale(0.8) translateY(12%);
+  }
+  80% {
+    transform: scale(0.9) translateY(5%);
+  }
+  93%, 100% {
+    transform: scale(1) translateY(0) translateZ(0);
+  }
 }
 
