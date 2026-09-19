@@ -9,6 +9,7 @@ import { TestimonialsSection } from './components/TestimonialsSection';
 import { BlogSection } from './components/BlogSection';
 import { FAQSection } from './components/FAQSection';
 import { PageLoader } from './components/PageLoader';
+import { AiAssistantWidget } from './components/AiAssistantWidget';
 import { ContactPage } from './components/ContactPage';
 import { Footer } from './components/Footer';
 import { PageView } from './types';
@@ -135,6 +136,9 @@ export default function App() {
         onNavigateToContact={() => handleNavigate('contact')}
         onNavigateToSection={(sectionId) => handleNavigate('home', sectionId)}
       />
+
+      {/* 4. Interactive Client AI Assistant Widget */}
+      <AiAssistantWidget onNavigateToContact={() => handleNavigate('contact')} />
     </div>
   );
 }
