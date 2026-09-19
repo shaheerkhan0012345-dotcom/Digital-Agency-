@@ -272,6 +272,7 @@ export const ProjectsSection: React.FC = () => {
                   cardRefs.current[index] = el;
                 }}
                 onClick={() => openModal(project)}
+                data-cursor-text="VIEW"
                 className="group flex flex-col space-y-4 cursor-pointer text-left focus:outline-none"
               >
                 {/* 1. Project Mockup Frame */}

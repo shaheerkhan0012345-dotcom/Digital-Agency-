@@ -379,3 +379,19 @@
   }
 }
 
+/* -------------------------------------------------------------
+   MATCHING HIGH-TECH DIGITAL AGENCY CUSTOM CURSOR
+   ------------------------------------------------------------- */
+@media (pointer: fine) {
+  html.custom-cursor-active,
+  html.custom-cursor-active body,
+  html.custom-cursor-active a,
+  html.custom-cursor-active button,
+  html.custom-cursor-active [role="button"],
+  html.custom-cursor-active input[type="button"],
+  html.custom-cursor-active input[type="submit"],
+  html.custom-cursor-active .cursor-pointer {
+    cursor: none !important;
+  }
+}
+

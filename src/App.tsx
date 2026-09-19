@@ -9,6 +9,7 @@ import { TestimonialsSection } from './components/TestimonialsSection';
 import { BlogSection } from './components/BlogSection';
 import { FAQSection } from './components/FAQSection';
 import { PageLoader } from './components/PageLoader';
+import { CustomCursor } from './components/CustomCursor';
 import { AiAssistantWidget } from './components/AiAssistantWidget';
 import { ContactPage } from './components/ContactPage';
 import { Footer } from './components/Footer';
@@ -139,6 +140,9 @@ export default function App() {
 
       {/* 4. Interactive Client AI Assistant Widget */}
       <AiAssistantWidget onNavigateToContact={() => handleNavigate('contact')} />
+
+      {/* 5. Fluid Emerald Brand Custom Cursor & Neon Aura */}
+      <CustomCursor />
     </div>
   );
 }
